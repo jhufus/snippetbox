@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -12,7 +14,23 @@ func home(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	w.Write([]byte("Hello from Snippetbox"))
+
+	files := []string{
+		"C:\\Users\\XIaomi\\go\\src\\github.com\\jhufus\\snippetbox\\ui\\html\\home.page.tmpl.html",
+		"C:\\Users\\XIaomi\\go\\src\\github.com\\jhufus\\snippetbox\\ui\\html\\base.layout.tmpl.html",
+		"C:\\Users\\XIaomi\\go\\src\\github.com\\jhufus\\snippetbox\\ui\\html\\footer.partial.tmpl.html",
+	}
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+	}
+
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+	}
 }
 
 // обработчик для отображения содержимого заметки
@@ -29,7 +47,6 @@ func showSnippet(w http.ResponseWriter, r *http.Request) {
 func createSnippet(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
-		w.Header()["Data"] = nil
 		http.Error(w, "Method is restricted", 405)
 		return
 	}
